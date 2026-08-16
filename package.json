@@ -1,0 +1,28 @@
+{
+    "name": "live-location-tracker",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "dev": "node --watch index"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devEngines": {
+        "packageManager": {
+            "name": "pnpm",
+            "version": "^11.14.0",
+            "onFail": "download"
+        }
+    },
+    "type": "module",
+    "dependencies": {
+        "express": "^5.2.1",
+        "socket.io": "^4.8.3"
+    },
+    "devDependencies": {
+        "@types/express": "^5.0.6",
+        "@types/node": "^26.2.0"
+    }
+}
