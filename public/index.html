@@ -47,7 +47,8 @@
                                 console.log(`Got User Current Position -`, position);
                                 const latitude = position.coords.latitude;
                                 const longitude = position.coords.longitude;
-                                resolve({ latitude, longitude });
+                                const accuracy = position.coords.accuracy;
+                                resolve({ latitude, longitude, accuracy });
                             },
                             (error) => {
                                 reject(error);
@@ -60,7 +61,25 @@
                 });
             }
 
-            getUserCurrentLocation().then((position) => console.log(position));
+            async function main() {
+                const { latitude, longitude, accuracy } = await getUserCurrentLocation();
+
+                //add a marker on map
+                L.marker([latitude, longitude]).addTo(map).bindPopup("You are here").openPopup();
+
+                //highlight your location based on accuracy
+                const accuracyCircle = L.circle([latitude, longitude], {
+                    radius: accuracy,
+                    color: "#0074D9",
+                    fillColor: "#7FDBFF",
+                    fillOpacity: 0.3,
+                }).addTo(map);
+
+                // Zoom and center the map onto the accuracy circle bounds
+                map.fitBounds(accuracyCircle.getBounds());
+            }
+
+            window.addEventListener("load", main);
         </script>
     </body>
 </html>
