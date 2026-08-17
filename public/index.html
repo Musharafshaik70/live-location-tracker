@@ -53,7 +53,7 @@
                             (error) => {
                                 reject(error);
                             },
-                            { enableHighAccuracy: true },
+                            { enableHighAccuracy: true, timeout: 7 * 1000 },
                         );
                     } else {
                         alert("Your browser does not support Geolocation");
@@ -61,25 +61,45 @@
                 });
             }
 
-            async function main() {
-                const { latitude, longitude, accuracy } = await getUserCurrentLocation();
+            // Store the circle and marker reference outside globally
+            let myCurrentLocationMarker = null;
+            let accuracyCircle = null;
 
-                //add a marker on map
-                L.marker([latitude, longitude]).addTo(map).bindPopup("You are here").openPopup();
+            async function updateLocation() {
+                try {
+                    const { latitude, longitude, accuracy } = await getUserCurrentLocation();
+                    const latLng = [latitude, longitude];
+                    socket.emit("client:location:update", latLng);
 
-                //highlight your location based on accuracy
-                const accuracyCircle = L.circle([latitude, longitude], {
-                    radius: accuracy,
-                    color: "#0074D9",
-                    fillColor: "#7FDBFF",
-                    fillOpacity: 0.3,
-                }).addTo(map);
+                    // 1. Manage Marker
+                    if (!myCurrentLocationMarker) {
+                        myCurrentLocationMarker = L.marker(latLng).addTo(map).bindPopup("You are here").openPopup();
+                    } else {
+                        myCurrentLocationMarker.setLatLng(latLng);
+                    }
 
-                // Zoom and center the map onto the accuracy circle bounds
-                map.fitBounds(accuracyCircle.getBounds());
+                    // 2. update Accuracy Circle
+                    if (!accuracyCircle) {
+                        accuracyCircle = L.circle(latLng, {
+                            radius: accuracy,
+                            color: "#0074D9",
+                            fillColor: "#7FDBFF",
+                            fillOpacity: 0.3,
+                        }).addTo(map);
+                    } else {
+                        accuracyCircle.setLatLng(latLng);
+                        accuracyCircle.setRadius(accuracy);
+                    }
+
+                    // 3. Update Map View
+                    map.fitBounds(accuracyCircle.getBounds());
+                } catch (error) {
+                    console.error("Error updating location:", error.message);
+                }
             }
 
-            window.addEventListener("load", main);
+            window.addEventListener("load", updateLocation);
+            setInterval(updateLocation, 10 * 1000);
         </script>
     </body>
 </html>

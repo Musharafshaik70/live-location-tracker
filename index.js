@@ -15,6 +15,9 @@ async function main() {
     //socket.io handlers
     io.on("connection", (socket) => {
         console.log(`Socket - ${socket.id} connected`);
+        socket.on("client:location:update", (data) => {
+            console.log(`Socket - ${socket.id} is at ${data}`);
+        });
     });
 
     //express handlers
