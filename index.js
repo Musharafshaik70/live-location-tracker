@@ -38,6 +38,7 @@ async function main() {
     });
 
     io.attach(httpServer);
+
     //socket.io handlers
     io.on("connection", (socket) => {
         console.log(`Socket - ${socket.id} connected`);
